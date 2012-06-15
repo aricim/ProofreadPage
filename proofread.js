@@ -42,7 +42,7 @@ function pr_make_edit_area( container, text ) {
 			pageHeader = m2[1];
 			// apparently lookahead is not supported by all browsers
 			// so let us do another regexp
-			re3 = /^([\s\S]*?)<noinclude>([\s\S]*?)<\/noinclude>/;
+			re3 = /^([\s\S]*)<noinclude>([\s\S]*)<\/noinclude>\s*$/;
 			m3 = m2[2].match( re3 );
 			if( m3 ) {
 				pageBody   = m3[1];
@@ -749,18 +749,18 @@ function pr_setup() {
 		return;
 	}
 	var f = text.parentNode;
-	var new_text = f.removeChild( text );
 
 	if( proofreadPageIsEdit ) {
-		pr_make_edit_area( self.text_container, new_text.value );
-		var copywarn = document.getElementById( 'editpage-copywarn' );
-		f.insertBefore( table, copywarn );
+		pr_make_edit_area( self.text_container, text.value );
+		f.insertBefore( table, text.nextSibling ); // Inserts table after text
+		f.removeChild( text );
 		if ( !self.proofreadpage_show_headers ) {
 			hookEvent( 'load', pr_toggle_visibility );
 		} else {
 			hookEvent( 'load', pr_reset_size );
 		}
 	} else {
+		var new_text = f.removeChild( text );
 		self.text_container.appendChild( new_text );
 		f.appendChild( self.table );
 	}
@@ -954,9 +954,9 @@ function pr_init() {
 	}
 }
 
-$(document).ready( pr_init );
-$(document).ready( pr_init_tabs );
-$(document).ready( pr_initzoom );
+jQuery( pr_init );
+jQuery( pr_init_tabs );
+jQuery( pr_initzoom );
 
 
 /* Quality buttons */
@@ -1035,4 +1035,4 @@ function pr_add_quality_buttons() {
 	}
 }
 
-$(document).ready( pr_add_quality_buttons );
+jQuery( pr_add_quality_buttons );

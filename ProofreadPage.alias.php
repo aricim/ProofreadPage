@@ -25,9 +25,32 @@ $specialPageAliases['br'] = array(
 	'IndexPages' => array( 'PajennoùMeneger' ),
 );
 
+/** Danish (Dansk) */
+$specialPageAliases['da'] = array(
+	'IndexPages' => array( 'Indekssider' ),
+);
+
+/** German (Deutsch) */
+$specialPageAliases['de'] = array(
+	'IndexPages' => array( 'Seiten_indexieren' ),
+	'PagesWithoutScans' => array( 'Seiten_ohne_Scans' ),
+);
+
+/** Persian (فارسی) */
+$specialPageAliases['fa'] = array(
+	'IndexPages' => array( 'فهرست_صفحه‌ها' ),
+	'PagesWithoutScans' => array( 'صفحه‌های_اسکن_نشده' ),
+);
+
 /** Haitian (Kreyòl ayisyen) */
 $specialPageAliases['ht'] = array(
 	'IndexPages' => array( 'PajEndèks' ),
+);
+
+/** Interlingua (Interlingua) */
+$specialPageAliases['ia'] = array(
+	'IndexPages' => array( 'Paginas_de_indice' ),
+	'PagesWithoutScans' => array( 'Paginas_non_transcludite' ),
 );
 
 /** Japanese (日本語) */
@@ -44,11 +67,24 @@ $specialPageAliases['lb'] = array(
 /** Macedonian (Македонски) */
 $specialPageAliases['mk'] = array(
 	'IndexPages' => array( 'ИндексираниСтраници' ),
+	'PagesWithoutScans' => array( 'СтранициБезПроверки' ),
 );
 
 /** Malayalam (മലയാളം) */
 $specialPageAliases['ml'] = array(
 	'IndexPages' => array( 'സൂചികാതാളുകൾ' ),
+);
+
+/** Norwegian Bokmål (‪Norsk (bokmål)‬) */
+$specialPageAliases['nb'] = array(
+	'IndexPages' => array( 'Indekssider' ),
+	'PagesWithoutScans' => array( 'Sider_uten_skanninger' ),
+);
+
+/** Nedersaksisch (Nedersaksisch) */
+$specialPageAliases['nds-nl'] = array(
+	'IndexPages' => array( 'Indexpagina\'s' ),
+	'PagesWithoutScans' => array( 'Pagina\'s_zonder_deurlochting' ),
 );
 
 /** Dutch (Nederlands) */
@@ -57,10 +93,9 @@ $specialPageAliases['nl'] = array(
 	'PagesWithoutScans' => array( 'PaginasZonderScans', 'Pagina\'sZonderScans' ),
 );
 
-/** Norwegian (bokmål)‬ (‪Norsk (bokmål)‬) */
-$specialPageAliases['no'] = array(
-	'IndexPages' => array( 'Indekssider' ),
-	'PagesWithoutScans' => array( 'Sider_uten_skanninger' ),
+/** Swedish (Svenska) */
+$specialPageAliases['sv'] = array(
+	'IndexPages' => array( 'Indexsidor' ),
 );
 
 /** Turkish (Türkçe) */
@@ -74,8 +109,3 @@ $specialPageAliases['vec'] = array(
 	'IndexPages' => array( 'PagineDeIndice' ),
 	'PagesWithoutScans' => array( 'PagineSensaScansion' ),
 );
-
-/**
- * For backwards compatibility with MediaWiki 1.15 and earlier.
- */
-$aliases =& $specialPageAliases;
