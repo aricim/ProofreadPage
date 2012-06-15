@@ -41,6 +41,8 @@ class PagesWithoutScans extends QueryPage {
 	/**
 	 * Return a clause with the list of disambiguation templates.
 	 * This function was copied verbatim from specials/SpecialDisambiguations.php
+	 * @param $dbr DatabaseBase
+	 * @return mixed
 	 */
 	function disambiguation_templates( $dbr ) {
 		$dMsgText = wfMsgForContent('disambiguationspage');
@@ -73,11 +75,11 @@ class PagesWithoutScans extends QueryPage {
 		}
 		return $linkBatch->constructSet( 'tl', $dbr );
 	}
-	
+
 	function getQueryInfo() {
 		$dbr = wfGetDB( DB_SLAVE );
 		$page_ns_index = MWNamespace::getCanonicalIndex( strtolower( str_replace( ' ', '_', $this->page_namespace ) ) );
-		
+
 		// Construct subqueries
 		$pagesWithScansSubquery = $dbr->selectSQLText(
 			array( 'templatelinks', 'page' ),
@@ -88,7 +90,7 @@ class PagesWithoutScans extends QueryPage {
 				'page_namespace' => NS_MAIN
 			)
 		);
-		
+
 		// Exclude disambiguation pages too
 		$dt = $this->disambiguation_templates( $dbr );
 		$disambigPagesSubquery = $dbr->selectSQLText(
@@ -100,7 +102,7 @@ class PagesWithoutScans extends QueryPage {
 				$dt
 			)
 		);
-		
+
 		return array(
 			'tables' => 'page',
 			'fields' => array(
@@ -114,7 +116,7 @@ class PagesWithoutScans extends QueryPage {
 				"page_id NOT IN ($pagesWithScansSubquery)",
 				"page_id NOT IN ($disambigPagesSubquery)" ),
 			'options' => array( 'USE INDEX' => 'page_len' )
-		);	
+		);
 	}
 
 	function sortDescending() {
@@ -122,27 +124,28 @@ class PagesWithoutScans extends QueryPage {
 	}
 
 	function formatResult( $skin, $result ) {
-		global $wgLang, $wgContLang;
+		global $wgContLang;
 		$dm = $wgContLang->getDirMark();
 
 		$title = Title::makeTitleSafe( $result->namespace, $result->title );
 		if ( !$title ) {
 			return '<!-- Invalid title ' .  htmlspecialchars( "{$result->namespace}:{$result->title}" ) . '-->';
 		}
-		$hlink = $skin->linkKnown(
+		$hlink = Linker::linkKnown(
 			$title,
 			wfMsgHtml( 'hist' ),
 			array(),
 			array( 'action' => 'history' )
 		);
 		$plink = $this->isCached()
-					? $skin->link( $title )
-					: $skin->linkKnown( $title );
-		$size = wfMsgExt( 'nbytes', array( 'parsemag', 'escape' ), $wgLang->formatNum( htmlspecialchars( $result->value ) ) );
+					? Linker::link( $title )
+					: Linker::linkKnown( $title );
+		$size = wfMsgExt( 'nbytes', array( 'parsemag', 'escape' ),
+			$this->getLanguage()->formatNum( htmlspecialchars( $result->value ) )
+		);
 
 		return $title->exists()
 				? "({$hlink}) {$dm}{$plink} {$dm}[{$size}]"
 				: "<s>({$hlink}) {$dm}{$plink} {$dm}[{$size}]</s>";
 	}
 }
-

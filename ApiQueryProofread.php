@@ -31,7 +31,7 @@ class ApiQueryProofread extends ApiQueryBase {
 
 		$pageNamespaceId = ProofreadPage::getPageNamespaceId();
 		$pageIds = array();
-		foreach ( $pages AS $pageId => $title ) {
+		foreach ( $pages as $pageId => $title ) {
 			if ( $title->getNamespace() == $pageNamespaceId ) {
 				$pageIds[] = $pageId;
 			}
@@ -98,6 +98,6 @@ class ApiQueryProofread extends ApiQueryBase {
 	}
 
 	public function getVersion() {
-		return __CLASS__ . ': $Id: ApiQueryProofread.php 99814 2011-10-14 21:28:59Z reedy $';
+		return __CLASS__ . ': $Id$';
 	}
 }

@@ -57,12 +57,12 @@ $wgGroupPermissions['user']['pagequality'] = true;
 
 # Client-side resources
 $prpResourceTemplate = array(
-	'localBasePath' => dirname( __FILE__ ),
-	'remoteExtPath' => 'ProofreadPage'
+	'localBasePath' => dirname( __FILE__ ). '/modules',
+	'remoteExtPath' => 'ProofreadPage/modules'
 );
 $wgResourceModules += array(
 	'ext.proofreadpage.page' => $prpResourceTemplate + array(
-		'scripts' => 'proofread.js',
+		'scripts' => 'ext.proofreadpage.page/ext.proofreadpage.page.js',
 		'dependencies' => array( 'mediawiki.legacy.wikibits' ),
 		'messages' => array(
 			'proofreadpage_header',
@@ -83,13 +83,14 @@ $wgResourceModules += array(
 			'proofreadpage-button-reset-zoom-label',
 			'proofreadpage-button-zoom-in-label',
 			'proofreadpage-button-toggle-layout-label',
+			'proofreadpage-preferences-showheaders-label',
 		)
 	),
 	'ext.proofreadpage.article' => $prpResourceTemplate + array(
-		'scripts' => 'proofread_article.js'
+		'scripts' => 'ext.proofreadpage.article/ext.proofreadpage.article.js'
 	),
 	'ext.proofreadpage.index' => $prpResourceTemplate + array(
-		'scripts' => 'proofread_index.js'
+		'scripts' => 'ext.proofreadpage.index/ext.proofreadpage.index.js'
 	),
 );
 
@@ -107,3 +108,5 @@ $wgHooks['LoadExtensionSchemaUpdates'][] = 'ProofreadPage::onLoadExtensionSchema
 $wgHooks['EditPage::importFormData'][] = 'ProofreadPage::onEditPageImportFormData';
 $wgHooks['OutputPageParserOutput'][] = 'ProofreadPage::onOutputPageParserOutput';
 $wgHooks['wgQueryPages'][] = 'ProofreadPage::onwgQueryPages';
+$wgHooks['GetPreferences'][] = 'ProofreadPage::onGetPreferences';
+$wgHooks['LinksUpdateConstructed'][] = 'ProofreadPage::onLinksUpdateConstructed';
