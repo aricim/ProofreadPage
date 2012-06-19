@@ -73,6 +73,8 @@ Remarks||10',
 	'proofreadpage-button-zoom-out-label'          => 'Zoom out',
 	'proofreadpage-button-reset-zoom-label'        => 'Original size',
 	'proofreadpage-button-zoom-in-label'           => 'Zoom in',
+	'proofreadpage-button-synchro-on-label'        => 'Synchro image on',
+	'proofreadpage-button-synchro-off-label'       => 'Synchro image off',
 	'proofreadpage-button-toggle-layout-label'     => 'Vertical/horizontal layout',
 	'proofreadpage-preferences-showheaders-label'  => 'Show header and footer fields when editing in the Page namespace'
 );
@@ -2047,6 +2049,8 @@ Remarques||10',
 	'proofreadpage-button-zoom-out-label' => 'Dézoomer',
 	'proofreadpage-button-reset-zoom-label' => 'Réinitialiser le zoom',
 	'proofreadpage-button-zoom-in-label' => 'Zoomer',
+	'proofreadpage-button-synchro-on-label' => "Synchroniser l'image",
+	'proofreadpage-button-synchro-off-label' => "Ne plus synchroniser l'image",
 	'proofreadpage-button-toggle-layout-label' => 'Disposition verticale/horizontale',
 	'proofreadpage-preferences-showheaders-label' => "Afficher des champs d'en-tête et de pied de page lors de l'édition en mode page",
 );

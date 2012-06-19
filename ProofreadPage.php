@@ -28,8 +28,8 @@ $wgAutoloadClasses['ProofreadPage'] = $dir . 'ProofreadPage_body.php';
 $wgExtensionCredits['other'][] = array(
 	'path'           => __FILE__,
 	'name'           => 'ProofreadPage',
-	'author'         => 'ThomasV',
-	'version'        => '2010-09-17',
+	'author'         => 'ThomasV, Rical',
+	'version'        => '2012-06-19',
 	'url'            => 'https://www.mediawiki.org/wiki/Extension:Proofread_Page',
 	'descriptionmsg' => 'proofreadpage_desc',
 );
@@ -82,6 +82,8 @@ $wgResourceModules += array(
 			'proofreadpage-button-zoom-out-label',
 			'proofreadpage-button-reset-zoom-label',
 			'proofreadpage-button-zoom-in-label',
+			'proofreadpage-button-synchro-on-label',
+			'proofreadpage-button-synchro-off-label',
 			'proofreadpage-button-toggle-layout-label',
 			'proofreadpage-preferences-showheaders-label',
 		)

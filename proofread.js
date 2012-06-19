@@ -9,6 +9,7 @@ function pr_init_tabs() {
 
 function pr_image_url( requested_width ) {
 	if( self.proofreadPageExternalURL ) {
+		pr_debug_trace( ', ExtURL=' + self.proofreadPageExternalURL );
 		self.DisplayWidth = requested_width;
 		self.DisplayHeight = '';
 		return self.proofreadPageExternalURL;
@@ -174,6 +175,14 @@ function pr_toggle_layout() {
 	pr_zoom( 0 );
 }
 
+function pr_synchro_init() {
+	// init var for 
+	pr_synchro( 1 ); // default synchro on
+	pr_synchro_dir='l2r'; // default synchro direction left to right
+	// text line 1 to 99 default synchronize with Y=100 to Y=900 in image /1000
+	pr_synchro_memo={{L:1;X:500;Y:100};{L:99;X:500;Y:900}}; // to save in metadata
+}
+
 /*
  * Mouse Zoom.  Credits: http://valid.tjp.hu/zoom/
  */
@@ -193,6 +202,8 @@ var ieox = 0;
 var ieoy = 0;
 var ffox = 0;
 var ffoy = 0;
+
+var pr_synchro_on = 0 ; // synchro mode can be y=0=off or y=1=on
 
 /* relative coordinates of the mouse pointer */
 function get_xy( evt ) {
@@ -555,6 +566,46 @@ function pr_set_margins( mx, my, new_width ) {
 	}
 }
 
+self.pr_synchro = function( y ) {
+	// synchro can be y=0=off or y=1=on or 2<= y <1000 /per mille, for a position in the wikitext 
+	if ( y == 0 ) { // synchro become off
+		pr_synchro_on = y; // change mode but do not move image
+		pr_synchro_on = y; // change image on button
+		var btn = document.getElementById( 'mw-synchro-on-hr' );
+		if( btn ) {
+			btn.src = mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/Button_synchro_off.png';
+		};
+		/*
+		var tag = '<span class="pr_debug_trace" >' + txt + '</span>';
+		var t = $("textarea #wpTextbox1").html( ); // Rical
+		$("textarea #wpTextbox1").html( tag + t ); // Rical
+		var toolbar = document.getElementById( 'toolbar' );
+		var ig = document.getElementById( 'mw-editbutton-hr' );
+		if( toolbar ) {
+			var f = document.createElement( 'span' );
+			f.innerHTML = f.innerHTML + txt;
+			toolbar.parentNode.insertBefore( f, ig ); //, ig.nextSibling.nextSibling.nextSibling );
+		}
+		*/
+	};
+	if ( y == 1 ) { // synchro become on
+		pr_synchro_on = y; // change mode but do not move image
+		var btn = document.getElementById( 'mw-synchro-on-hr' );
+		if( btn ) {
+			btn.src = mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/Button_synchro_on.png';
+		};
+	};
+	if ( y >= 2 ) { // synchro move image from a position in the wikitext in %
+		var old_margin_x = margin_x;
+		var old_margin_y = margin_y;
+		var old_width = img_width;
+		// minimal computing to debug, will adapt to P points, C columns, hebrew, chinese
+		if ( y < 20 ) { y = 20 };
+		if ( y > (pr_container.Eight - 20) ) { y = 999 };
+		pr_set_margins( old_margin_x, y, pr_container.offsetWidth - 20 );
+	};
+};
+
 self.pr_zoom = function( delta ) {
 	if ( delta == 0 ) {
 		// reduce width by 20 pixels in order to prevent horizontal scrollbar
@@ -672,6 +723,39 @@ function pr_load_image( ) {
 	pr_zoom( 0 );
 }
 
+// Rical trace for debug, div #prp_header, textarea #wpTextbox1 // tag.class #id
+function pr_debug_trace( txt ) {
+	var tag = '<span class="pr_debug_trace" >' + txt + '</span>';
+	var t = $("textarea #wpTextbox1").html( ); // Rical
+	$("textarea #wpTextbox1").html( tag + t ); // Rical
+	var toolbar = document.getElementById( 'toolbar' );
+	var ig = document.getElementById( 'mw-editbutton-hr' );
+	if( toolbar ) {
+		var f = document.createElement( 'span' );
+		f.innerHTML = f.innerHTML + txt;
+		toolbar.parentNode.insertBefore( f, ig ); //, ig.nextSibling.nextSibling.nextSibling );
+	}
+	var ig = document.getElementById( 'wpTextbox1' );
+	if( ig ) {
+		var f = document.createElement( 'span' );
+		f.innerHTML = f.innerHTML + txt;
+		ig.parentNode.insertBefore( f, ig.nextSibling.nextSibling.nextSibling ); //, ig.nextSibling.nextSibling.nextSibling
+	}
+}
+/* example to code before. delete after debug
+	var toolbar = document.getElementById( 'toolbar' );
+	var ig = document.getElementById( 'wpWatchthis' );
+	if( !ig ) {
+		ig = document.getElementById( 'wpSummary' );
+	}
+	if( !ig ) {
+		return;
+	}
+	var f = document.createElement( 'span' );
+	ig.parentNode.insertBefore( f, ig.nextSibling.nextSibling.nextSibling );
+	f.innerHTML = f.innerHTML + '&nbsp;' + escapeQuotesHTML( mediaWiki.msg( 'proofreadpage_page_status' ) );
+*/
+
 function pr_setup() {
 	self.pr_horiz = ( self.proofreadpage_default_layout == 'horizontal' );
 	if( !proofreadPageIsEdit ) {
@@ -774,6 +858,7 @@ function pr_setup() {
 					'label': mw.msg( 'proofreadpage-group-zoom' ),
 					'tools': {
 						'zoom-in': {
+							ident: 'mw-zoom-in',
 							label: mw.msg( 'proofreadpage-button-zoom-in-label' ),
 							type: 'button',
 							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/Button_zoom_in.png',
@@ -785,8 +870,10 @@ function pr_setup() {
 									pr_zoom(2);
 								}
 							}
+							pr_debug_trace( ', zoom-in' )
 						},
 						'zoom-out': {
+							ident: 'mw-zoom-out',
 							label: mw.msg( 'proofreadpage-button-zoom-out-label' ),
 							type: 'button',
 							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/Button_zoom_out.png',
@@ -798,8 +885,10 @@ function pr_setup() {
 									pr_zoom(-2);
 								}
 							}
+							pr_debug_trace( ', zoom-out' )
 						},
 						'reset-zoom': {
+							ident: 'mw-reset-zoom',
 							label: mw.msg( 'proofreadpage-button-reset-zoom-label' ),
 							type: 'button',
 							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/Button_examine.png',
@@ -809,6 +898,30 @@ function pr_setup() {
 									pr_zoom(0);
 								}
 							}
+						},
+						'synchro-on': {
+							ident: 'mw-synchro-on',
+							label: mw.msg( 'proofreadpage-button-synchro-on-label' ),
+							type: 'button',
+							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/Button_synchro_on.png',
+							action: {
+								type: 'callback',
+								execute: function() {
+									pr_synchro(1);
+								}
+							}
+						},
+						'synchro-off': {
+							ident: 'mw-synchro-off',
+							label: mw.msg( 'proofreadpage-button-synchro-off-label' ),
+							type: 'button',
+							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/Button_synchro_off.png',
+							action: {
+								type: 'callback',
+								execute: function() {
+									pr_synchro(0);
+								}
+							}
 						}
 					}
 				},
@@ -816,17 +929,20 @@ function pr_setup() {
 					'label': mw.msg( 'proofreadpage-group-other' ),
 					'tools': {
 						'toggle-visibility': {
+							ident: 'mw-toggle-visibility',
 							label: mw.msg( 'proofreadpage-button-toggle-visibility-label' ),
 							type: 'button',
-							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/button_category_plus.png',
+							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/Button_category_plus.png',
 							action: {
 								type: 'callback',
 								execute: function() {
 									pr_toggle_visibility();
 								}
 							}
+							pr_debug_trace( ', toggle-visibility' )
 						},
 						'toggle-layout': {
+							ident: 'mw-toggle-layout',
 							label: mw.msg( 'proofreadpage-button-toggle-layout-label' ),
 							type: 'button',
 							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/Button_multicol.png',
@@ -836,6 +952,7 @@ function pr_setup() {
 									pr_toggle_layout();
 								}
 							}
+							pr_debug_trace( ', toggle-layout' )
 						}
 					}
 				}
@@ -843,17 +960,17 @@ function pr_setup() {
 		};
 
 		var $edit = $( '#wpTextbox1' );
-		if( typeof $edit.wikiEditor == 'function' ) {
-			setTimeout(function() {
-			$edit.wikiEditor( 'addToToolbar', {
-				'sections': {
-					'proofreadpage-tools': {
-						'type': 'toolbar',
-						'label': mw.msg( 'proofreadpage-section-tools' )
+		if( mw.user.options.get('usebetatoolbar') ) {
+			mw.loader.using('ext.wikiEditor.toolbar', function() {
+				$edit.wikiEditor( 'addToToolbar', {
+					'sections': {
+						'proofreadpage-tools': {
+							'type': 'toolbar',
+							'label': mw.msg( 'proofreadpage-section-tools' )
+						}
 					}
-				}
-			} )
-			.wikiEditor( 'addToToolbar', tools);
+				} )
+				.wikiEditor( 'addToToolbar', tools);
 			}, 500);
 		} else {
 			var toolbar = document.getElementById( 'toolbar' );
@@ -872,6 +989,8 @@ function pr_setup() {
 				tools.groups.zoom.tools['zoom-out'],
 				tools.groups.zoom.tools['reset-zoom'],
 				tools.groups.zoom.tools['zoom-in'],
+				tools.groups.zoom.tools['synchro-on'],
+				tools.groups.zoom.tools['synchro-off'],
 				tools.groups.other.tools['toggle-layout']
 			];
 			$.each(bits, function(i, button) {
@@ -879,6 +998,7 @@ function pr_setup() {
 				image.width = 23;
 				image.height = 22;
 				image.className = 'mw-toolbar-editbutton';
+				image.id = button.ident;
 				image.src = button.icon;
 				image.border = 0;
 				image.alt = button.label;

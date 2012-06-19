@@ -1,4 +1,4 @@
-// Author : ThomasV - License : GPL
+// Author : ThomasV - License : GPL, Rical 2012-06-19-16h57
 
 function pr_init_tabs() {
 	$( '#ca-talk' ).prev().before( '<li id="ca-prev"><span>' + self.proofreadPagePrevLink + '</span></li>' );
@@ -549,6 +549,46 @@ function pr_set_margins( mx, my, new_width ) {
 	}
 }
 
+var mw_pr_synchro_on = 1; // synchro mode can be y=0=off or y=1=on
+var mw_pr_synchro_dir='l2r'; // default synchro direction left to right
+var mw_pr_synchro_memo=[{ L:1, X:500, Y:100}, {L:99, X:500, Y:900 }]; // to save in metadata
+
+function mw_pr_synchro_init() {
+	pr_synchro( 1 ); // default synchro on
+	mw_pr_synchro_dir='l2r'; // default synchro direction left to right
+	// text line 1 to 99 default synchronize with Y=100 to Y=900 in image /1000
+	mw_pr_synchro_memo=[{ L:1, X:500, Y:100}, {L:99, X:500, Y:900 }]; // to save in metadata
+}
+
+self.pr_synchro = function( y ) {
+	// synchro can be y=0=off or y=1=on or 1< y <1000 / per thousand, for a position in the wikitext 
+	if ( y < 0 ) { y = 0 }; // normalize y
+	if ( y > 999 ) { y = 999 }; // normalize y
+	if ( y < 2 ) { // change mode but do not move image
+		mw_pr_synchro_on = y; // change mode but do not move image
+		var btn = document.getElementById( 'mw-synchro-on' );
+		if( btn ) { // change image on button
+			btn.title = btn.title +':'+ y;
+			if ( y == 0 ) { // synchro become off
+				btn.src = "/extensions/ProofreadPage/Button-synchro-off.png";
+			} 
+			else { // synchro become on
+				btn.src = "/extensions/ProofreadPage/Button-synchro-on.png";
+			};
+		} 
+	} 
+	else { 
+	// y > 1 synchro move image from a position in the wikitext in per thousand
+		var old_margin_x = margin_x;
+		var old_margin_y = margin_y;
+		var old_width = img_width;
+		// minimal calculation to debug, to adapt to P points, C columns, hebrew, chinese
+		if ( y < 20 ) { y = 20 };
+		if ( y > (pr_container.Eight - 20) ) { y = 999 };
+		pr_set_margins( old_margin_x, y, pr_container.offsetWidth - 20 );
+	};
+};
+
 self.pr_zoom = function( delta ) {
 	if ( delta == 0 ) {
 		// reduce width by 20 pixels in order to prevent horizontal scrollbar
@@ -660,6 +700,47 @@ function pr_fill_table() {
 	pr_zoom( 0 );
 }
 
+function pr_load_image( ) {
+	pr_container.innerHTML = '<img id="ProofReadImage" src="' +
+		escapeQuotesHTML( self.proofreadPageViewURL ) + '" width="' + img_width + '" />';
+	pr_zoom( 0 );
+}
+
+// Rical trace for debug, div #prp_header, textarea #wpTextbox1 // tag.class #id
+function pr_debug_trace( txt ) {
+//	var tag = '<span class="pr_debug_trace" >' + txt + '</span>';
+//	var t = $("textarea #wpTextbox1").html( ); // Rical
+//	$("textarea #wpTextbox1").html( tag + t ); // Rical
+//	var toolbar = document.getElementById( 'toolbar' );
+	var f = document.getElementById( 'mw-synchro-on' );
+	if( f ) {
+		f.title = f.title + txt;
+	}
+}
+/* example to code before. delete after debug
+	var toolbar = document.getElementById( 'toolbar' );
+	var ig = document.getElementById( 'wpWatchthis' );
+	if( !ig ) {
+		ig = document.getElementById( 'wpSummary' );
+	}
+	if( !ig ) {
+		return;
+	}
+	var f = document.createElement( 'span' );
+	ig.parentNode.insertBefore( f, ig.nextSibling.nextSibling.nextSibling );
+	f.innerHTML = f.innerHTML + '&nbsp;' + escapeQuotesHTML( mediaWiki.msg( 'proofreadpage_page_status' ) );
+	
+		//var f = document.createElement( 'span' );
+		//toolbar.parentNode.insertBefore( f, ig ); //, ig.nextSibling.nextSibling.nextSibling );
+	
+	var ig = document.getElementById( 'wpTextbox1' );
+	if( ig ) {
+		var f = document.createElement( 'span' );
+		f.innerHTML = f.innerHTML + txt;
+		ig.parentNode.insertBefore( f, ig.nextSibling.nextSibling.nextSibling ); //, ig.nextSibling.nextSibling.nextSibling
+	}
+*/
+
 function pr_setup() {
 	self.pr_horiz = ( self.proofreadpage_default_layout == 'horizontal' );
 	if( !proofreadPageIsEdit ) {
@@ -764,6 +845,7 @@ function pr_setup() {
 					'label': mw.msg( 'proofreadpage-group-zoom' ),
 					'tools': {
 						'zoom-in': {
+							ident: 'mw-zoom-in',
 							label: mw.msg( 'proofreadpage-button-zoom-in-label' ),
 							type: 'button',
 							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/modules/ext.proofreadpage.page/images/Button_zoom_in.png',
@@ -773,10 +855,12 @@ function pr_setup() {
 									xx=0;
 									yy=0;
 									pr_zoom(2);
+									pr_debug_trace( ', zoom-in' );
 								}
 							}
 						},
 						'zoom-out': {
+							ident: 'mw-zoom-out',
 							label: mw.msg( 'proofreadpage-button-zoom-out-label' ),
 							type: 'button',
 							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/modules/ext.proofreadpage.page/images/Button_zoom_out.png',
@@ -786,10 +870,12 @@ function pr_setup() {
 									xx=0;
 									yy=0;
 									pr_zoom(-2);
+									pr_debug_trace( ', zoom-out' );
 								}
 							}
 						},
 						'reset-zoom': {
+							ident: 'mw-reset-zoom',
 							label: mw.msg( 'proofreadpage-button-reset-zoom-label' ),
 							type: 'button',
 							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/modules/ext.proofreadpage.page/images/Button_examine.png',
@@ -799,6 +885,30 @@ function pr_setup() {
 									pr_zoom(0);
 								}
 							}
+						},
+						'synchro-on': {
+							ident: 'mw-synchro-on',
+							label: mw.msg( 'proofreadpage-button-synchro-on-label' ),
+							type: 'button',
+							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/modules/ext.proofreadpage.page/images/Button_synchro_on.png',
+							action: {
+								type: 'callback',
+								execute: function() {
+									pr_synchro( 1 - mw_pr_synchro_on );
+								}
+							}
+						},
+						'synchro-off': {
+							ident: 'mw-synchro-off',
+							label: mw.msg( 'proofreadpage-button-synchro-off-label' ),
+							type: 'button',
+							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/modules/ext.proofreadpage.page/images/Button_synchro_off.png',
+							action: {
+								type: 'callback',
+								execute: function() {
+									pr_synchro(0);
+								}
+							}
 						}
 					}
 				},
@@ -806,6 +916,7 @@ function pr_setup() {
 					'label': mw.msg( 'proofreadpage-group-other' ),
 					'tools': {
 						'toggle-visibility': {
+							ident: 'mw-toggle-visibility',
 							label: mw.msg( 'proofreadpage-button-toggle-visibility-label' ),
 							type: 'button',
 							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/modules/ext.proofreadpage.page/images/Button_category_plus.png',
@@ -813,10 +924,12 @@ function pr_setup() {
 								type: 'callback',
 								execute: function() {
 									pr_toggle_visibility();
+									pr_debug_trace( ', toggle-visibility' );
 								}
 							}
 						},
 						'toggle-layout': {
+							ident: 'mw-toggle-layout',
 							label: mw.msg( 'proofreadpage-button-toggle-layout-label' ),
 							type: 'button',
 							icon: mw.config.get( 'wgExtensionAssetsPath' ) + '/ProofreadPage/modules/ext.proofreadpage.page/images/Button_multicol.png',
@@ -824,6 +937,7 @@ function pr_setup() {
 								type: 'callback',
 								execute: function() {
 									pr_toggle_layout();
+									pr_debug_trace( ', toggle-layout' );
 								}
 							}
 						}
@@ -862,6 +976,8 @@ function pr_setup() {
 				tools.groups.zoom.tools['zoom-out'],
 				tools.groups.zoom.tools['reset-zoom'],
 				tools.groups.zoom.tools['zoom-in'],
+				tools.groups.zoom.tools['synchro-on'],
+				tools.groups.zoom.tools['synchro-off'],
 				tools.groups.other.tools['toggle-layout']
 			];
 			$.each(bits, function(i, button) {
@@ -869,6 +985,7 @@ function pr_setup() {
 				image.width = 23;
 				image.height = 22;
 				image.className = 'mw-toolbar-editbutton';
+				image.id = button.ident;
 				image.src = button.icon;
 				image.border = 0;
 				image.alt = button.label;
