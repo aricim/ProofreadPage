@@ -4,6 +4,8 @@
  *
  * @file
  * @ingroup Extensions
+ *
+ * + Rical 2012-06-20-10h37
  */
 
 $messages = array();

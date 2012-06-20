@@ -1,4 +1,4 @@
-// Author : ThomasV - License : GPL, Rical 2012-06-19-16h57
+// Author : ThomasV - License : GPL, Rical 2012-06-20-10h37
 
 function pr_init_tabs() {
 	$( '#ca-talk' ).prev().before( '<li id="ca-prev"><span>' + self.proofreadPagePrevLink + '</span></li>' );
